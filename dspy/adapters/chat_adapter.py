@@ -15,7 +15,7 @@ from pydantic.fields import FieldInfo
 from dspy.adapters.base import Adapter
 from dspy.adapters.utils import find_enum_member, format_field_value
 from dspy.signatures.field import OutputField
-from dspy.signatures.signature import Signature, SignatureMeta
+from dspy.signatures.signature import Signature, SignatureMeta, infer_prefix
 from dspy.signatures.utils import get_dspy_field_type
 
 field_header_pattern = re.compile(r"\[\[ ## (\w+) ## \]\]")
@@ -284,9 +284,9 @@ def enumerate_fields(fields: dict) -> str:
     parts = []
     for idx, (k, v) in enumerate(fields.items()):
         parts.append(f"{idx+1}. `{k}`")
-        parts[-1] += f" ({get_annotation_name(v.annotation)})"
-        parts[-1] += f": {v.json_schema_extra['desc']}" if v.json_schema_extra["desc"] != f"${{{k}}}" else ""
-
+        parts[-1] += f" ({get_annotation_name(v.annotation)})" # name and type of field.
+        parts[-1] += f": {v.json_schema_extra['desc']}" if v.json_schema_extra["desc"] != f"${{{k}}}" else "" # description of the field, only add if not default.
+        parts[-1] += f" The field should start with: '{v.json_schema_extra['prefix']}'" if v.json_schema_extra["prefix"] != f"{infer_prefix(k)}:" else ""
     return "\n".join(parts).strip()
 
 

@@ -17,7 +17,7 @@ from dspy.adapters.base import Adapter
 from dspy.adapters.utils import find_enum_member, format_field_value, serialize_for_json
 
 from ..adapters.image_utils import Image
-from ..signatures.signature import SignatureMeta
+from ..signatures.signature import SignatureMeta, infer_prefix
 from ..signatures.utils import get_dspy_field_type
 
 _logger = logging.getLogger(__name__)
@@ -261,7 +261,7 @@ def enumerate_fields(fields):
         parts.append(f"{idx+1}. `{k}`")
         parts[-1] += f" ({get_annotation_name(v.annotation)})"
         parts[-1] += f": {v.json_schema_extra['desc']}" if v.json_schema_extra["desc"] != f"${{{k}}}" else ""
-
+        parts[-1] += f" The field should start with: '{v.json_schema_extra['prefix']}'" if v.json_schema_extra["prefix"] != f"{infer_prefix(k)}:" else ""
     return "\n".join(parts).strip()
 
 
